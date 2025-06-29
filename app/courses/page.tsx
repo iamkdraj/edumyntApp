@@ -22,12 +22,7 @@ import {
   ArrowRight,
   GraduationCap,
   Target,
-  Brain,
-  Calculator,
-  FlaskConical,
-  Landmark,
-  Newspaper,
-  Lightbulb
+  Brain
 } from 'lucide-react';
 import { db } from '@/lib/supabase/database';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
@@ -64,7 +59,8 @@ export default function CoursesPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const enrolledRef = useRef<HTMLDivElement>(null);
-  const allCoursesRef = useRef<HTMLDivElement>(null);
+  const englishRef = useRef<HTMLDivElement>(null);
+  const psychologyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
@@ -80,7 +76,6 @@ export default function CoursesPage() {
 
       // Load courses
       const coursesData = await db.getCourses();
-      console.log('Loaded courses:', coursesData);
       setCourses(coursesData || []);
 
       // Load user enrollments if logged in
@@ -125,8 +120,7 @@ export default function CoursesPage() {
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.subject.toLowerCase().includes(searchQuery.toLowerCase());
+                         course.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
     
     if (selectedTab === 'enrolled') {
@@ -139,27 +133,39 @@ export default function CoursesPage() {
     return matchesSearch && matchesSubject;
   });
 
-  // Group courses by subject for better organization
+  // Group courses by subject
   const enrolledCourses = courses.filter(c => enrollments.some(e => e.course_id === c.id));
-  const coursesBySubject = courses.reduce((acc, course) => {
-    if (!acc[course.subject]) {
-      acc[course.subject] = [];
-    }
-    acc[course.subject].push(course);
-    return acc;
-  }, {} as Record<string, Course[]>);
+  const englishCourses = courses.filter(c => c.subject.toLowerCase() === 'english');
+  const psychologyCourses = courses.filter(c => c.subject.toLowerCase() === 'psychology');
 
-  // Get subject icon
-  const getSubjectIcon = (subject: string) => {
-    switch (subject.toLowerCase()) {
-      case 'english': return <BookOpen className="h-5 w-5" />;
-      case 'psychology': return <Brain className="h-5 w-5" />;
-      case 'mathematics': return <Calculator className="h-5 w-5" />;
-      case 'science': return <FlaskConical className="h-5 w-5" />;
-      case 'history': return <Landmark className="h-5 w-5" />;
-      case 'current affairs': return <Newspaper className="h-5 w-5" />;
-      case 'reasoning': return <Lightbulb className="h-5 w-5" />;
-      default: return <BookOpen className="h-5 w-5" />;
+  // Tab data
+  const tabs = [
+    {
+      key: 'enrolled',
+      label: 'Enrolled',
+      icon: <GraduationCap className="h-4 w-4 mr-1" />,
+      count: enrolledCourses.length,
+      ref: enrolledRef,
+    },
+    {
+      key: 'english',
+      label: 'English',
+      icon: <BookOpen className="h-4 w-4 mr-1" />,
+      count: englishCourses.length,
+      ref: englishRef,
+    },
+    {
+      key: 'psychology',
+      label: 'Psychology',
+      icon: <Brain className="h-4 w-4 mr-1" />,
+      count: psychologyCourses.length,
+      ref: psychologyRef,
+    },
+  ];
+
+  const handleTabClick = (ref: React.RefObject<HTMLDivElement>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -179,163 +185,62 @@ export default function CoursesPage() {
   return (
     <AppShell>
       <div className="flex-1 space-y-6 p-4 md:p-6">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Courses</h1>
-              <p className="text-muted-foreground">
-                Explore our comprehensive course catalog
-              </p>
-            </div>
-            
-            {/* Search and Filter */}
-            <div className="flex items-center gap-2">
-              <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Search className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Search Courses</h4>
-                    <Input
-                      placeholder="Search by title, description, or subject..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-60">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Filter Courses</h4>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Subject</label>
-                      <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select subject" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {subjects.map((subject) => (
-                            <SelectItem key={subject} value={subject}>
-                              {subject === 'all' ? 'All Subjects' : subject}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-
-          {/* Quick Filter Tabs */}
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">All Courses ({courses.length})</TabsTrigger>
-              <TabsTrigger value="enrolled">Enrolled ({enrolledCourses.length})</TabsTrigger>
-              <TabsTrigger value="free">Free Courses ({courses.filter(c => c.is_free).length})</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Sticky Tab Navigation */}
+        <div className="sticky top-0 z-30 bg-background py-2 border-b flex gap-2 items-center">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => handleTabClick(tab.ref)}
+              className="flex items-center px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium"
+            >
+              {tab.icon}
+              {tab.label}
+              <span className="ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* Enrolled Courses Section */}
-        {user && enrolledCourses.length > 0 && (
-          <div ref={enrolledRef} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              <h2 className="text-xl font-semibold">Your Enrolled Courses</h2>
-            </div>
-            <CoursesGrid 
-              courses={enrolledCourses} 
-              user={user}
-              enrollments={enrollments}
-              onEnroll={handleEnroll}
-              showProgress={true}
-            />
-          </div>
-        )}
-
-        {/* All Courses by Subject */}
-        <div ref={allCoursesRef} className="space-y-8">
-          {selectedTab === 'all' ? (
-            // Show courses grouped by subject
-            Object.entries(coursesBySubject).map(([subject, subjectCourses]) => (
-              <div key={subject} className="space-y-4">
-                <div className="flex items-center gap-2">
-                  {getSubjectIcon(subject)}
-                  <h2 className="text-xl font-semibold">{subject} Courses</h2>
-                  <Badge variant="secondary">{subjectCourses.length}</Badge>
-                </div>
-                <CoursesGrid 
-                  courses={subjectCourses.filter(course => {
-                    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                         course.description?.toLowerCase().includes(searchQuery.toLowerCase());
-                    const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
-                    return matchesSearch && matchesSubject;
-                  })} 
-                  user={user}
-                  enrollments={enrollments}
-                  onEnroll={handleEnroll}
-                />
-              </div>
-            ))
-          ) : (
-            // Show filtered courses
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                <h2 className="text-xl font-semibold">
-                  {selectedTab === 'enrolled' ? 'Enrolled Courses' : 'Free Courses'}
-                </h2>
-                <Badge variant="secondary">{filteredCourses.length}</Badge>
-              </div>
-              <CoursesGrid 
-                courses={filteredCourses} 
-                user={user}
-                enrollments={enrollments}
-                onEnroll={handleEnroll}
-                showProgress={selectedTab === 'enrolled'}
-              />
-            </div>
-          )}
+        {/* Enrolled Section */}
+        <div ref={enrolledRef} className="space-y-4 pt-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <GraduationCap className="h-5 w-5" /> Enrolled Courses
+          </h2>
+          <CoursesGrid 
+            courses={enrolledCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+            showProgress={true}
+          />
         </div>
 
-        {/* No courses message */}
-        {filteredCourses.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No courses found</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchQuery || selectedSubject !== 'all' 
-                ? 'Try adjusting your search or filter criteria'
-                : 'No courses are available at the moment'
-              }
-            </p>
-            {(searchQuery || selectedSubject !== 'all') && (
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedSubject('all');
-                  setSelectedTab('all');
-                }}
-              >
-                Clear Filters
-              </Button>
-            )}
-          </div>
-        )}
+        {/* English Section */}
+        <div ref={englishRef} className="space-y-4 pt-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <BookOpen className="h-5 w-5" /> English Courses
+          </h2>
+          <CoursesGrid 
+            courses={englishCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+          />
+        </div>
+
+        {/* Psychology Section */}
+        <div ref={psychologyRef} className="space-y-4 pt-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Brain className="h-5 w-5" /> Psychology Courses
+          </h2>
+          <CoursesGrid 
+            courses={psychologyCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+          />
+        </div>
       </div>
     </AppShell>
   );
@@ -358,14 +263,6 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
     const enrollment = enrollments.find(e => e.course_id === courseId);
     return enrollment?.progress_percentage || 0;
   };
-
-  if (courses.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        No courses in this category
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -408,7 +305,7 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                <span>{course.lessons?.[0]?.count || 1} lessons</span>
+                <span>{course.lessons?.[0]?.count || 0} lessons</span>
               </div>
               <div className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
