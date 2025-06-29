@@ -16,14 +16,8 @@ export async function signUp(email: string, password: string, fullName?: string)
 
   if (error) throw error
 
-  // Create profile after successful signup
-  if (data.user) {
-    await db.insertProfile({
-      id: data.user.id,
-      full_name: fullName || null,
-      username: email.split('@')[0], // Default username from email
-    })
-  }
+  // Profile creation is handled by database trigger (handle_new_user)
+  // No need to manually create profile here
 
   return data
 }
