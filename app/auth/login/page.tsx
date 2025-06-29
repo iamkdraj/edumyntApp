@@ -20,8 +20,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +30,8 @@ export default function LoginPage() {
       await signIn(email, password);
       toast.success('Welcome back!');
       
-      // Use window.location for a hard redirect to ensure middleware runs
-      window.location.href = redirectTo;
+      // Direct redirect to dashboard
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');
