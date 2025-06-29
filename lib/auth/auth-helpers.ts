@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { db } from '@/lib/supabase/database'
 
 export async function signUp(email: string, password: string, fullName?: string) {
   const supabase = createClient()
@@ -25,12 +24,20 @@ export async function signUp(email: string, password: string, fullName?: string)
 export async function signIn(email: string, password: string) {
   const supabase = createClient()
   
+  console.log('Attempting sign in with:', { email, password: '***' });
+  
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
 
-  if (error) throw error
+  console.log('Sign in result:', { data: data?.user ? 'User found' : 'No user', error });
+
+  if (error) {
+    console.error('Sign in error:', error);
+    throw error;
+  }
+  
   return data
 }
 
@@ -45,8 +52,12 @@ export async function getCurrentUser() {
   const supabase = createClient()
   
   const { data: { user }, error } = await supabase.auth.getUser()
-  if (error) throw error
+  if (error) {
+    console.error('Get user error:', error);
+    throw error;
+  }
   
+  console.log('Current user:', user ? 'Found' : 'Not found');
   return user
 }
 
@@ -54,7 +65,13 @@ export async function getCurrentUserProfile() {
   const user = await getCurrentUser()
   if (!user) return null
   
-  return await db.getProfile(user.id)
+  // For now, just return the user data since we're having issues with the database
+  return {
+    id: user.id,
+    full_name: user.user_metadata?.full_name || null,
+    username: user.email?.split('@')[0] || null,
+    email: user.email
+  }
 }
 
 export async function resetPassword(email: string) {

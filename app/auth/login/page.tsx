@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,14 +27,19 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await signIn(email, password);
+      console.log('Attempting to sign in...');
+      const result = await signIn(email, password);
+      console.log('Sign in successful:', result);
+      
       toast.success('Welcome back!');
       
-      // Direct redirect to dashboard
-      router.push('/dashboard');
+      // Force a hard redirect to dashboard
+      window.location.href = '/dashboard';
+      
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');
+      toast.error('Login failed');
     } finally {
       setIsLoading(false);
     }
