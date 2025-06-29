@@ -30,8 +30,6 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -47,16 +45,30 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   )
 
-  // Redirect authenticated users away from auth pages
-  if (user && isAuthRoute && !request.nextUrl.pathname.includes('/auth/callback')) {
+  // Allow auth callback to proceed without redirect
+  if (request.nextUrl.pathname.includes('/auth/callback')) {
+    return response
+  }
+
+  // Redirect authenticated users away from auth pages to dashboard
+  if (user && isAuthRoute) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect unauthenticated users from protected routes
+  // Redirect unauthenticated users from protected routes to login
   if (!user && isProtectedRoute) {
     const redirectUrl = new URL('/auth/login', request.url)
     redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
+  }
+
+  // Redirect root path based on auth status
+  if (request.nextUrl.pathname === '/') {
+    if (user) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    } else {
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
   }
 
   return response

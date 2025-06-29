@@ -31,8 +31,11 @@ export default function LoginPage() {
     try {
       await signIn(email, password);
       toast.success('Welcome back!');
-      router.push(redirectTo);
+      
+      // Use window.location for a hard redirect to ensure middleware runs
+      window.location.href = redirectTo;
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');
     } finally {
       setIsLoading(false);
