@@ -26,6 +26,7 @@ import {
 import { db } from '@/lib/supabase/database';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface Course {
   id: string;
@@ -299,123 +300,128 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
         const SubjectIcon = getSubjectIcon(course.subject);
         
         return (
-          <Card key={course.id} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md overflow-hidden">
-            <CardHeader className="space-y-4 p-0">
-              {/* Course Image */}
-              <div className="aspect-video relative overflow-hidden">
-                {course.thumbnail_url ? (
-                  <img 
-                    src={course.thumbnail_url} 
-                    alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/15 group-hover:to-primary/10 transition-colors">
-                    <SubjectIcon className="h-8 w-8 text-primary" />
+          <Link key={course.id} href={`/courses/${course.id}`}>
+            <Card className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md overflow-hidden cursor-pointer">
+              <CardHeader className="space-y-4 p-0">
+                {/* Course Image */}
+                <div className="aspect-video relative overflow-hidden">
+                  {course.thumbnail_url ? (
+                    <img 
+                      src={course.thumbnail_url} 
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/15 group-hover:to-primary/10 transition-colors">
+                      <SubjectIcon className="h-8 w-8 text-primary" />
+                    </div>
+                  )}
+                  {/* Overlay with subject badge */}
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="secondary" className="text-xs bg-background/90 backdrop-blur-sm">
+                      {course.subject}
+                    </Badge>
+                  </div>
+                  {/* Price badge */}
+                  <div className="absolute top-3 right-3">
+                    {course.is_free ? (
+                      <Badge variant="outline" className="text-green-600 border-green-200 bg-background/90 backdrop-blur-sm">
+                        Free
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
+                        ₹{course.price}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 p-4 pb-0">
+                  <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
+                    {course.title}
+                  </CardTitle>
+                  
+                  <CardDescription className="text-sm line-clamp-2">
+                    {course.description}
+                  </CardDescription>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4 p-4">
+                {/* Course Stats */}
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span>{course.lessons?.[0]?.count || 0} lessons</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>{course.user_enrollments?.[0]?.count || 0} students</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span>4.8</span>
+                  </div>
+                </div>
+
+                {/* Progress Bar (for enrolled courses) */}
+                {showProgress && isEnrolled(course.id) && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="font-medium">{getEnrollmentProgress(course.id)}%</span>
+                    </div>
+                    <Progress value={getEnrollmentProgress(course.id)} className="h-2" />
                   </div>
                 )}
-                {/* Overlay with subject badge */}
-                <div className="absolute top-3 left-3">
-                  <Badge variant="secondary" className="text-xs bg-background/90 backdrop-blur-sm">
-                    {course.subject}
-                  </Badge>
-                </div>
-                {/* Price badge */}
-                <div className="absolute top-3 right-3">
-                  {course.is_free ? (
-                    <Badge variant="outline" className="text-green-600 border-green-200 bg-background/90 backdrop-blur-sm">
-                      Free
-                    </Badge>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {isEnrolled(course.id) ? (
+                    <Button className="flex-1" size="sm">
+                      <Play className="h-4 w-4 mr-2" />
+                      Continue Learning
+                    </Button>
                   ) : (
-                    <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
-                      ${course.price}
-                    </Badge>
+                    <>
+                      {course.preview_enabled && (
+                        <Button variant="outline" size="sm">
+                          <Play className="h-4 w-4 mr-2" />
+                          Preview
+                        </Button>
+                      )}
+                      <Button 
+                        className="flex-1" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onEnroll(course.id);
+                        }}
+                        disabled={!user}
+                      >
+                        {!user ? (
+                          <>
+                            <Lock className="h-4 w-4 mr-2" />
+                            Sign in to Enroll
+                          </>
+                        ) : course.is_free ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Enroll Free
+                          </>
+                        ) : (
+                          <>
+                            <Target className="h-4 w-4 mr-2" />
+                            Enroll Now
+                          </>
+                        )}
+                      </Button>
+                    </>
                   )}
                 </div>
-              </div>
-
-              <div className="space-y-2 p-4 pb-0">
-                <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
-                  {course.title}
-                </CardTitle>
-                
-                <CardDescription className="text-sm line-clamp-2">
-                  {course.description}
-                </CardDescription>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4 p-4">
-              {/* Course Stats */}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{course.lessons?.[0]?.count || 0} lessons</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>{course.user_enrollments?.[0]?.count || 0} students</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span>4.8</span>
-                </div>
-              </div>
-
-              {/* Progress Bar (for enrolled courses) */}
-              {showProgress && isEnrolled(course.id) && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{getEnrollmentProgress(course.id)}%</span>
-                  </div>
-                  <Progress value={getEnrollmentProgress(course.id)} className="h-2" />
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                {isEnrolled(course.id) ? (
-                  <Button className="flex-1" size="sm">
-                    <Play className="h-4 w-4 mr-2" />
-                    Continue Learning
-                  </Button>
-                ) : (
-                  <>
-                    {course.preview_enabled && (
-                      <Button variant="outline" size="sm">
-                        <Play className="h-4 w-4 mr-2" />
-                        Preview
-                      </Button>
-                    )}
-                    <Button 
-                      className="flex-1" 
-                      size="sm"
-                      onClick={() => onEnroll(course.id)}
-                      disabled={!user}
-                    >
-                      {!user ? (
-                        <>
-                          <Lock className="h-4 w-4 mr-2" />
-                          Sign in to Enroll
-                        </>
-                      ) : course.is_free ? (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Enroll Free
-                        </>
-                      ) : (
-                        <>
-                          <Target className="h-4 w-4 mr-2" />
-                          Enroll Now
-                        </>
-                      )}
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         );
       })}
     </div>
