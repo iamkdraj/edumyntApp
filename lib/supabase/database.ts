@@ -80,6 +80,36 @@ export class DatabaseService {
     return data
   }
 
+  // Course modules operations
+  async getCourseModules(courseId: string) {
+    const { data, error } = await this.supabase
+      .from('course_modules')
+      .select(`
+        *,
+        lessons(*)
+      `)
+      .eq('course_id', courseId)
+      .order('order_index')
+    
+    if (error) throw error
+    return data
+  }
+
+  async getModule(moduleId: string) {
+    const { data, error } = await this.supabase
+      .from('course_modules')
+      .select(`
+        *,
+        lessons(*),
+        courses(*)
+      `)
+      .eq('id', moduleId)
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
   // Enrollment operations
   async enrollInCourse(userId: string, courseId: string) {
     const { data, error } = await this.supabase
@@ -137,7 +167,8 @@ export class DatabaseService {
       .select(`
         *,
         courses(*),
-        notes(*)
+        notes(*),
+        course_modules(*)
       `)
       .eq('id', lessonId)
       .single()
@@ -193,7 +224,8 @@ export class DatabaseService {
       .from('tests')
       .select(`
         *,
-        questions(count)
+        questions(count),
+        courses(*)
       `)
 
     if (courseId) {
