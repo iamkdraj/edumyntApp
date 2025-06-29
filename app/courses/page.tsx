@@ -174,15 +174,9 @@ export default function CoursesPage() {
   return (
     <AppShell>
       <div className="flex-1 space-y-6 p-4 md:p-6">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Courses</h1>
-          <p className="text-muted-foreground">Explore our comprehensive course catalog</p>
-        </div>
-
         {/* Sticky Tab Navigation */}
-        <div className="sticky top-0 z-30 bg-background py-4 border-b">
-          <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide pb-2">
+        <div className="sticky top-0 z-30 bg-background border-b">
+          <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide py-3">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
@@ -201,6 +195,8 @@ export default function CoursesPage() {
             })}
           </div>
         </div>
+        {/* Add margin below sticky nav so content is not hidden */}
+        <div className="h-2 md:h-4" />
 
         {/* Enrolled Section */}
         <div ref={enrolledRef} className="space-y-6 pt-4">
@@ -233,7 +229,7 @@ export default function CoursesPage() {
           return (
             <div 
               key={subject}
-              ref={el => subjectRefs.current[subject] = el}
+              ref={el => { subjectRefs.current[subject] = el; }}
               className="space-y-6 pt-8"
             >
               <div className="flex items-center gap-3">
