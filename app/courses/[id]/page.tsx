@@ -373,44 +373,53 @@ export default function CourseDetailPage() {
                       <CollapsibleContent>
                         <CardContent className="pt-0">
                           <div className="space-y-2">
-                            {module.lessons.map((lesson, lessonIndex) => (
-                              <div 
-                                key={lesson.id}
-                                className={`flex items-center justify-between p-3 rounded-lg border ${
-                                  canAccessLesson(lesson, module) 
-                                    ? 'hover:bg-muted/50 cursor-pointer' 
-                                    : 'opacity-60'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
-                                    {canAccessLesson(lesson, module) ? (
-                                      <Play className="h-4 w-4" />
-                                    ) : (
-                                      <Lock className="h-4 w-4" />
-                                    )}
-                                  </div>
-                                  <div className="space-y-1">
-                                    <p className="font-medium">{lesson.title}</p>
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                      <span className="capitalize">{lesson.lesson_type}</span>
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        <span>{lesson.estimated_duration}m</span>
-                                      </div>
-                                      {lesson.is_preview && (
-                                        <Badge variant="outline" className="text-xs">Preview</Badge>
+                            {module.lessons.map((lesson, lessonIndex) => {
+                              const lessonUrl = `/courses/${courseId}/lesson/${lesson.id}`;
+                              const content = (
+                                <div 
+                                  className={`flex items-center justify-between p-3 rounded-lg border ${
+                                    canAccessLesson(lesson, module) 
+                                      ? 'hover:bg-muted/50 cursor-pointer' 
+                                      : 'opacity-60'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
+                                      {canAccessLesson(lesson, module) ? (
+                                        <Play className="h-4 w-4" />
+                                      ) : (
+                                        <Lock className="h-4 w-4" />
                                       )}
                                     </div>
+                                    <div className="space-y-1">
+                                      <p className="font-medium">{lesson.title}</p>
+                                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                        <span className="capitalize">{lesson.lesson_type}</span>
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{lesson.estimated_duration}m</span>
+                                        </div>
+                                        {lesson.is_preview && (
+                                          <Badge variant="outline" className="text-xs">Preview</Badge>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
+                                  {canAccessLesson(lesson, module) && (
+                                    <Button variant="ghost" size="sm">
+                                      <Play className="h-4 w-4" />
+                                    </Button>
+                                  )}
                                 </div>
-                                {canAccessLesson(lesson, module) && (
-                                  <Button variant="ghost" size="sm">
-                                    <Play className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
+                              );
+                              return canAccessLesson(lesson, module) ? (
+                                <Link key={lesson.id} href={lessonUrl}>
+                                  {content}
+                                </Link>
+                              ) : (
+                                <div key={lesson.id}>{content}</div>
+                              );
+                            })}
                           </div>
                         </CardContent>
                       </CollapsibleContent>
