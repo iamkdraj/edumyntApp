@@ -1,43 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
 import { Loader2 } from 'lucide-react';
 
 export default function RootPage() {
-  const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('Checking authentication...');
+        console.log('Root page: Checking authentication...');
         const user = await getCurrentUser();
         
         if (user) {
-          console.log('User found, redirecting to dashboard');
-          // User is logged in, redirect to dashboard
+          console.log('Root page: User found, redirecting to dashboard');
           window.location.href = '/dashboard';
         } else {
-          console.log('No user found, redirecting to login');
-          // User is not logged in, redirect to login
+          console.log('Root page: No user found, redirecting to login');
           window.location.href = '/auth/login';
         }
       } catch (error) {
-        console.error('Error checking auth:', error);
-        // Error checking auth, redirect to login
+        console.error('Root page: Error checking auth:', error);
         window.location.href = '/auth/login';
       } finally {
         setIsChecking(false);
       }
     };
 
-    checkAuth();
+    // Add a small delay to ensure the page is fully loaded
+    const timer = setTimeout(checkAuth, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   if (!isChecking) {
-    return null; // Don't render anything if we're not checking anymore
+    return null;
   }
 
   return (

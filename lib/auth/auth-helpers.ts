@@ -15,9 +15,6 @@ export async function signUp(email: string, password: string, fullName?: string)
 
   if (error) throw error
 
-  // Profile creation is handled by database trigger (handle_new_user)
-  // No need to manually create profile here
-
   return data
 }
 
@@ -26,19 +23,32 @@ export async function signIn(email: string, password: string) {
   
   console.log('Attempting sign in with:', { email, password: '***' });
   
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-  console.log('Sign in result:', { data: data?.user ? 'User found' : 'No user', error });
+    console.log('Supabase response:', { 
+      user: data?.user ? 'User found' : 'No user', 
+      session: data?.session ? 'Session created' : 'No session',
+      error: error?.message || 'No error'
+    });
 
-  if (error) {
-    console.error('Sign in error:', error);
-    throw error;
+    if (error) {
+      console.error('Supabase auth error:', error);
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      throw new Error('No user returned from authentication');
+    }
+
+    return data;
+  } catch (err: any) {
+    console.error('Auth helper error:', err);
+    throw err;
   }
-  
-  return data
 }
 
 export async function signOut() {
@@ -51,14 +61,20 @@ export async function signOut() {
 export async function getCurrentUser() {
   const supabase = createClient()
   
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error) {
-    console.error('Get user error:', error);
-    throw error;
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    
+    if (error) {
+      console.error('Get user error:', error);
+      return null; // Return null instead of throwing for better UX
+    }
+    
+    console.log('Current user check:', user ? 'User found' : 'No user');
+    return user;
+  } catch (err) {
+    console.error('Unexpected error getting user:', err);
+    return null;
   }
-  
-  console.log('Current user:', user ? 'Found' : 'Not found');
-  return user
 }
 
 export async function getCurrentUserProfile() {
