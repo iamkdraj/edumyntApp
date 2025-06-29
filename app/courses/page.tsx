@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,14 +52,17 @@ interface UserEnrollment {
 }
 
 // Subject icons mapping
-const subjectIcons: { [key: string]: any } = {
-  'English': BookOpen,
-  'Psychology': Brain,
-  'Mathematics': Calculator,
-  'Science': FlaskConical,
-  'History': Landmark,
-  'Current Affairs': Newspaper,
-  'Reasoning': Lightbulb,
+const getSubjectIcon = (subject: string) => {
+  switch (subject) {
+    case 'English': return BookOpen;
+    case 'Psychology': return Brain;
+    case 'Mathematics': return Calculator;
+    case 'Science': return FlaskConical;
+    case 'History': return Landmark;
+    case 'Current Affairs': return Newspaper;
+    case 'Reasoning': return Lightbulb;
+    default: return BookOpen;
+  }
 };
 
 export default function CoursesPage() {
@@ -156,21 +159,21 @@ export default function CoursesPage() {
     {
       key: 'enrolled',
       label: 'Enrolled',
-      icon: <GraduationCap className="h-4 w-4 mr-1" />,
+      icon: GraduationCap,
       count: enrolledCourses.length,
       ref: enrolledRef,
     },
     {
       key: 'all',
       label: 'All Courses',
-      icon: <BookOpen className="h-4 w-4 mr-1" />,
+      icon: BookOpen,
       count: courses.length,
       ref: allCoursesRef,
     },
     ...subjects.slice(1).map(subject => ({
       key: subject.toLowerCase(),
       label: subject,
-      icon: React.createElement(subjectIcons[subject] || BookOpen, { className: "h-4 w-4 mr-1" }),
+      icon: getSubjectIcon(subject),
       count: coursesBySubject[subject]?.length || 0,
       ref: { current: subjectRefs.current[subject] },
     })),
@@ -258,19 +261,22 @@ export default function CoursesPage() {
         {/* Sticky Tab Navigation */}
         <div className="sticky top-0 z-30 bg-background py-2 border-b">
           <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide">
-            {tabs.map(tab => (
-              <button
-                key={tab.key}
-                onClick={() => handleTabClick(tab.ref)}
-                className="flex items-center px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium whitespace-nowrap"
-              >
-                {tab.icon}
-                {tab.label}
-                <span className="ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+            {tabs.map(tab => {
+              const IconComponent = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => handleTabClick(tab.ref)}
+                  className="flex items-center px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium whitespace-nowrap"
+                >
+                  <IconComponent className="h-4 w-4 mr-1" />
+                  {tab.label}
+                  <span className="ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -312,7 +318,7 @@ export default function CoursesPage() {
         {subjects.slice(1).map(subject => {
           const subjectCourses = coursesBySubject[subject] || [];
           const filteredSubjectCourses = getFilteredCourses(subjectCourses);
-          const SubjectIcon = subjectIcons[subject] || BookOpen;
+          const SubjectIcon = getSubjectIcon(subject);
           
           return (
             <div 
@@ -389,7 +395,7 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course) => {
-        const SubjectIcon = subjectIcons[course.subject] || BookOpen;
+        const SubjectIcon = getSubjectIcon(course.subject);
         
         return (
           <Card key={course.id} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md">
