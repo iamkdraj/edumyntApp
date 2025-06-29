@@ -46,18 +46,6 @@ export default function LoginPage() {
     }
   };
 
-  // Test login function for demo purposes
-  const handleTestLogin = async () => {
-    setIsLoading(true);
-    toast.success('Demo login successful!');
-    
-    // Simulate a brief loading state
-    setTimeout(() => {
-      setIsLoading(false);
-      window.location.href = '/dashboard';
-    }, 500);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -162,24 +150,6 @@ export default function LoginPage() {
                   </>
                 )}
               </Button>
-
-              {/* Demo Login Button */}
-              <Button 
-                type="button"
-                variant="outline"
-                className="w-full h-11" 
-                onClick={handleTestLogin}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  'Demo Login (Skip Authentication)'
-                )}
-              </Button>
               
               <div className="text-center text-sm text-muted-foreground">
                 Don't have an account?{' '}
@@ -189,22 +159,6 @@ export default function LoginPage() {
               </div>
             </CardFooter>
           </form>
-        </Card>
-
-        {/* Preview Access */}
-        <Card className="border-dashed">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Want to explore first?
-              </p>
-              <Link href="/courses">
-                <Button variant="outline" className="w-full">
-                  Browse Preview Lessons
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
         </Card>
       </div>
     </div>

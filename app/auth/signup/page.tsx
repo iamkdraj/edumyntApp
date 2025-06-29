@@ -284,22 +284,6 @@ export default function SignupPage() {
             </CardFooter>
           </form>
         </Card>
-
-        {/* Preview Access */}
-        <Card className="border-dashed">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Want to explore first?
-              </p>
-              <Link href="/courses">
-                <Button variant="outline" className="w-full">
-                  Browse Preview Lessons
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
