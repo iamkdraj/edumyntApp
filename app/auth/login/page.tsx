@@ -46,18 +46,8 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-end p-6">
-        <div className="text-sm text-muted-foreground">
-          New to EDUMYNT?{' '}
-          <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-            Sign up
-          </Link>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
           <div className="text-center space-y-6">

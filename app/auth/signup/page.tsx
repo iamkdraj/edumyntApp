@@ -78,7 +78,7 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         {/* Success Content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
           <div className="w-full max-w-md text-center space-y-8">
             <div className="flex justify-center">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
@@ -120,18 +120,8 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-end p-6">
-        <div className="text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/auth/login" className="text-primary hover:underline font-medium">
-            Sign in
-          </Link>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
           <div className="text-center space-y-6">
