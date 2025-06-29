@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, ArrowLeft, Loader2, Mail, Lock, ShoppingCart } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, ShoppingCart } from 'lucide-react';
 import { signIn } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
 
@@ -45,24 +45,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 md:p-6">
-        <Link href="/" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          <span className="text-sm font-medium">Back</span>
-        </Link>
-      </div>
-
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
-        <div className="w-full max-w-sm space-y-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md space-y-8">
           {/* Logo and Title */}
           <div className="text-center space-y-6">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-                  <ShoppingCart className="h-8 w-8 text-white" />
+                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
@@ -70,59 +62,72 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-gray-900">Sign in your account</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Welcome back
+              </h1>
+              <p className="text-muted-foreground">
+                Continue your learning journey
+              </p>
             </div>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="text-sm">
+              <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Email Field */}
             <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email address
+              </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  id="email"
                   type="email"
-                  placeholder="Email"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 h-14 bg-gray-100 border-0 rounded-2xl text-base placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-cyan-500 transition-all"
+                  className="pl-10 h-11"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
+                Password
+              </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 pr-12 h-14 bg-gray-100 border-0 rounded-2xl text-base placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-cyan-500 transition-all"
+                  className="pl-10 pr-10 h-11"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 h-auto p-0 hover:bg-transparent"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-auto p-1 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
                 </Button>
               </div>
@@ -132,21 +137,21 @@ export default function LoginPage() {
             <div className="text-right">
               <Link 
                 href="/auth/forgot-password" 
-                className="text-sm text-cyan-600 hover:text-cyan-700 font-medium transition-colors"
+                className="text-sm text-primary hover:underline font-medium"
               >
-                Forgot Password?
+                Forgot your password?
               </Link>
             </div>
 
             {/* Sign In Button */}
             <Button 
               type="submit" 
-              className="w-full h-14 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold rounded-2xl text-base shadow-lg transition-all duration-200 transform hover:scale-[1.02]" 
+              className="w-full h-11" 
               disabled={isLoading || !email || !password}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -155,11 +160,11 @@ export default function LoginPage() {
             </Button>
 
             {/* Sign Up Link */}
-            <div className="text-center">
-              <span className="text-gray-600 text-sm">
+            <div className="text-center pt-4">
+              <span className="text-muted-foreground text-sm">
                 Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-cyan-600 hover:text-cyan-700 font-semibold transition-colors">
-                  Sign Up
+                <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+                  Sign up for free
                 </Link>
               </span>
             </div>

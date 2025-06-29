@@ -295,29 +295,42 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
         const SubjectIcon = getSubjectIcon(course.subject);
         
         return (
-          <Card key={course.id} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md">
-            <CardHeader className="space-y-4">
-              {/* Course Image Placeholder */}
-              <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center group-hover:from-primary/15 group-hover:to-primary/10 transition-colors">
-                <SubjectIcon className="h-8 w-8 text-primary" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="text-xs">
+          <Card key={course.id} className="group hover:shadow-lg transition-all duration-200 border-0 shadow-md overflow-hidden">
+            <CardHeader className="space-y-4 p-0">
+              {/* Course Image */}
+              <div className="aspect-video relative overflow-hidden">
+                {course.thumbnail_url ? (
+                  <img 
+                    src={course.thumbnail_url} 
+                    alt={course.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:from-primary/15 group-hover:to-primary/10 transition-colors">
+                    <SubjectIcon className="h-8 w-8 text-primary" />
+                  </div>
+                )}
+                {/* Overlay with subject badge */}
+                <div className="absolute top-3 left-3">
+                  <Badge variant="secondary" className="text-xs bg-background/90 backdrop-blur-sm">
                     {course.subject}
                   </Badge>
+                </div>
+                {/* Price badge */}
+                <div className="absolute top-3 right-3">
                   {course.is_free ? (
-                    <Badge variant="outline" className="text-green-600 border-green-200">
+                    <Badge variant="outline" className="text-green-600 border-green-200 bg-background/90 backdrop-blur-sm">
                       Free
                     </Badge>
                   ) : (
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
                       ${course.price}
                     </Badge>
                   )}
                 </div>
+              </div>
 
+              <div className="space-y-2 p-4 pb-0">
                 <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
                   {course.title}
                 </CardTitle>
@@ -328,7 +341,7 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 p-4">
               {/* Course Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
