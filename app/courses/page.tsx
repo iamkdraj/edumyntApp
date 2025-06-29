@@ -233,7 +233,9 @@ export default function CoursesPage() {
           return (
             <div 
               key={subject}
-              ref={el => subjectRefs.current[subject] = el}
+              ref={el => {
+                subjectRefs.current[subject] = el;
+              }}
               className="space-y-6 pt-8"
             >
               <div className="flex items-center gap-3">
