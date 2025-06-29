@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, BookOpen, TestTube, MessageCircle, User } from 'lucide-react';
+import { Home, BookOpen, FileText, MessageCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
@@ -9,7 +9,7 @@ import Link from 'next/link';
 const navItems = [
   { icon: Home, label: 'Home', href: '/dashboard' },
   { icon: BookOpen, label: 'Courses', href: '/courses' },
-  { icon: TestTube, label: 'Tests', href: '/tests' },
+  { icon: FileText, label: 'Tests', href: '/tests' },
   { icon: MessageCircle, label: 'Discuss', href: '/discussions' },
   { icon: User, label: 'Profile', href: '/profile' },
 ];
