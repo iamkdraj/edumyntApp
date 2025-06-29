@@ -14,14 +14,14 @@ export default function RootPage() {
         const user = await getCurrentUser();
         if (user) {
           // User is logged in, redirect to dashboard
-          router.push('/dashboard');
+          router.replace('/dashboard');
         } else {
           // User is not logged in, redirect to login
-          router.push('/auth/login');
+          router.replace('/auth/login');
         }
       } catch (error) {
         // Error checking auth, redirect to login
-        router.push('/auth/login');
+        router.replace('/auth/login');
       }
     };
 

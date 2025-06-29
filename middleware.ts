@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ['/dashboard', '/courses', '/tests', '/profile']
-  const authRoutes = ['/login', '/signup', '/auth']
+  const authRoutes = ['/auth/login', '/auth/signup', '/auth/forgot-password']
   
   const isProtectedRoute = protectedRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users from protected routes
   if (!user && isProtectedRoute) {
-    const redirectUrl = new URL('/login', request.url)
+    const redirectUrl = new URL('/auth/login', request.url)
     redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }
