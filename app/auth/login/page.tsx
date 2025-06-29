@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, ArrowLeft, Loader2, Mail, Lock, ShoppingCart } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock, ShoppingCart } from 'lucide-react';
 import { signIn } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
 
@@ -45,16 +45,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-6">
-        <Link href="/" className="flex items-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors group">
-          <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Back</span>
-        </Link>
-        <div className="text-sm text-slate-500 dark:text-slate-400">
+      <div className="flex items-center justify-end p-6">
+        <div className="text-sm text-muted-foreground">
           New to EDUMYNT?{' '}
-          <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors">
+          <Link href="/auth/signup" className="text-primary hover:underline font-medium">
             Sign up
           </Link>
         </div>
@@ -66,21 +62,20 @@ export default function LoginPage() {
           {/* Logo and Title */}
           <div className="text-center space-y-6">
             <div className="flex justify-center">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                <div className="relative w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-xl">
-                  <ShoppingCart className="h-10 w-10 text-white" />
+              <div className="relative">
+                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="h-8 w-8 text-primary-foreground" />
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-foreground">
                 Welcome back
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
+              <p className="text-muted-foreground">
                 Continue your learning journey
               </p>
             </div>
@@ -89,18 +84,18 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-                <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Email Field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email address
               </label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -109,18 +104,18 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 h-12 bg-white/70 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 rounded-xl text-base placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all backdrop-blur-sm"
+                  className="pl-10 h-11"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label htmlFor="password" className="text-sm font-medium text-foreground">
                 Password
               </label>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -129,20 +124,20 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 pr-12 h-12 bg-white/70 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 rounded-xl text-base placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all backdrop-blur-sm"
+                  className="pl-10 pr-10 h-11"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-auto p-1 hover:bg-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-auto p-1 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4 text-muted-foreground" />
                   )}
                 </Button>
               </div>
@@ -152,7 +147,7 @@ export default function LoginPage() {
             <div className="text-right">
               <Link 
                 href="/auth/forgot-password" 
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors hover:underline"
+                className="text-sm text-primary hover:underline font-medium"
               >
                 Forgot your password?
               </Link>
@@ -161,12 +156,12 @@ export default function LoginPage() {
             {/* Sign In Button */}
             <Button 
               type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl text-base shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+              className="w-full h-11" 
               disabled={isLoading || !email || !password}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
               ) : (
@@ -176,9 +171,9 @@ export default function LoginPage() {
 
             {/* Sign Up Link */}
             <div className="text-center pt-4">
-              <span className="text-slate-600 dark:text-slate-400 text-sm">
+              <span className="text-muted-foreground text-sm">
                 Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors hover:underline">
+                <Link href="/auth/signup" className="text-primary hover:underline font-medium">
                   Sign up for free
                 </Link>
               </span>

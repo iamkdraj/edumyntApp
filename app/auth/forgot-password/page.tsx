@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Loader2, Mail, ShoppingCart, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, ShoppingCart } from 'lucide-react';
 import { resetPassword } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
 
@@ -33,15 +33,15 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6">
           <Button 
             variant="ghost" 
             onClick={() => setSuccess(false)}
-            className="flex items-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors group p-0"
+            className="flex items-center text-muted-foreground hover:text-foreground transition-colors p-0"
           >
-            <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             <span className="text-sm font-medium">Back</span>
           </Button>
         </div>
@@ -50,35 +50,32 @@ export default function ForgotPasswordPage() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
           <div className="w-full max-w-md text-center space-y-8">
             <div className="flex justify-center">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                <div className="relative w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-xl">
-                  <Mail className="w-10 h-10 text-white" />
-                </div>
+              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <div className="space-y-3">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-foreground">
                 Check your email
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
+              <p className="text-muted-foreground">
                 We've sent a password reset link to{' '}
-                <span className="font-semibold text-slate-900 dark:text-white">{email}</span>
+                <span className="font-semibold text-foreground">{email}</span>
               </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Please check your inbox and follow the instructions to reset your password.
               </p>
             </div>
-            <div className="space-y-4 pt-4">
+            <div className="space-y-3 pt-4">
               <Link href="/auth/login">
-                <Button className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl text-base shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]">
+                <Button className="w-full h-11">
                   Back to Login
                 </Button>
               </Link>
               <Button 
                 variant="outline" 
                 onClick={() => setSuccess(false)}
-                className="w-full h-12 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-base hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                className="w-full h-11"
               >
                 Try Different Email
               </Button>
@@ -90,16 +87,16 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-6">
-        <Link href="/auth/login" className="flex items-center text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors group">
-          <ArrowLeft className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+        <Link href="/auth/login" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-2" />
           <span className="text-sm font-medium">Back</span>
         </Link>
-        <div className="text-sm text-slate-500 dark:text-slate-400">
+        <div className="text-sm text-muted-foreground">
           Remember your password?{' '}
-          <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors">
+          <Link href="/auth/login" className="text-primary hover:underline font-medium">
             Sign in
           </Link>
         </div>
@@ -111,21 +108,20 @@ export default function ForgotPasswordPage() {
           {/* Logo and Title */}
           <div className="text-center space-y-6">
             <div className="flex justify-center">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                <div className="relative w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-xl">
-                  <ShoppingCart className="h-10 w-10 text-white" />
+              <div className="relative">
+                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="h-8 w-8 text-primary-foreground" />
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-foreground">
                 Reset your password
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
+              <p className="text-muted-foreground">
                 Enter your email to receive a reset link
               </p>
             </div>
@@ -134,18 +130,18 @@ export default function ForgotPasswordPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <Alert variant="destructive" className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
-                <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {/* Email Field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email address
               </label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -154,7 +150,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="pl-12 h-12 bg-white/70 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 rounded-xl text-base placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all backdrop-blur-sm"
+                  className="pl-10 h-11"
                 />
               </div>
             </div>
@@ -162,12 +158,12 @@ export default function ForgotPasswordPage() {
             {/* Send Reset Link Button */}
             <Button 
               type="submit" 
-              className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl text-base shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+              className="w-full h-11" 
               disabled={isLoading || !email}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Sending reset link...
                 </>
               ) : (
@@ -177,7 +173,7 @@ export default function ForgotPasswordPage() {
 
             {/* Back to Login Link */}
             <div className="text-center pt-4">
-              <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold text-sm transition-colors hover:underline">
+              <Link href="/auth/login" className="text-primary hover:underline font-medium text-sm">
                 Back to login
               </Link>
             </div>
