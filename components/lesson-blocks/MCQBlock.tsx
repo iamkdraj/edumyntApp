@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 
 export function MCQBlock({ data }: { data: { question: string, options: string[], correct: number } }) {
