@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { 
   BookOpen, 
@@ -19,7 +18,6 @@ import {
   Play,
   Lock,
   CheckCircle,
-  ArrowRight,
   GraduationCap,
   Target,
   Brain,
@@ -69,7 +67,6 @@ export default function CoursesPage() {
   const [enrollments, setEnrollments] = useState<UserEnrollment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [selectedTab, setSelectedTab] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -137,27 +134,22 @@ export default function CoursesPage() {
   // Get unique subjects from courses
   const subjects = ['all', ...Array.from(new Set(courses.map(c => c.subject)))];
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         course.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
-    
-    if (selectedTab === 'enrolled') {
-      return matchesSearch && matchesSubject && isEnrolled(course.id);
-    }
-    if (selectedTab === 'free') {
-      return matchesSearch && matchesSubject && course.is_free;
-    }
-    
-    return matchesSearch && matchesSubject;
-  });
-
   // Group courses by subject
   const enrolledCourses = courses.filter(c => enrollments.some(e => e.course_id === c.id));
   const coursesBySubject = subjects.slice(1).reduce((acc, subject) => {
     acc[subject] = courses.filter(c => c.subject === subject);
     return acc;
   }, {} as { [key: string]: Course[] });
+
+  // Filter courses based on search and subject
+  const getFilteredCourses = (coursesToFilter: Course[]) => {
+    return coursesToFilter.filter(course => {
+      const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           course.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
+      return matchesSearch && matchesSubject;
+    });
+  };
 
   // Tab data for navigation
   const tabs = [
@@ -257,20 +249,6 @@ export default function CoursesPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Course Type</h4>
-                    <Select value={selectedTab} onValueChange={setSelectedTab}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Courses</SelectItem>
-                        <SelectItem value="enrolled">Enrolled</SelectItem>
-                        <SelectItem value="free">Free Courses</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -303,7 +281,7 @@ export default function CoursesPage() {
           </h2>
           {enrolledCourses.length > 0 ? (
             <CoursesGrid 
-              courses={enrolledCourses} 
+              courses={getFilteredCourses(enrolledCourses)} 
               user={user}
               enrollments={enrollments}
               onEnroll={handleEnroll}
@@ -323,7 +301,7 @@ export default function CoursesPage() {
             <BookOpen className="h-5 w-5" /> All Courses
           </h2>
           <CoursesGrid 
-            courses={courses} 
+            courses={getFilteredCourses(courses)} 
             user={user}
             enrollments={enrollments}
             onEnroll={handleEnroll}
@@ -333,6 +311,7 @@ export default function CoursesPage() {
         {/* Subject-wise Sections */}
         {subjects.slice(1).map(subject => {
           const subjectCourses = coursesBySubject[subject] || [];
+          const filteredSubjectCourses = getFilteredCourses(subjectCourses);
           const SubjectIcon = subjectIcons[subject] || BookOpen;
           
           return (
@@ -344,13 +323,28 @@ export default function CoursesPage() {
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <SubjectIcon className="h-5 w-5" /> {subject} Courses
               </h2>
-              {subjectCourses.length > 0 ? (
+              {filteredSubjectCourses.length > 0 ? (
                 <CoursesGrid 
-                  courses={subjectCourses} 
+                  courses={filteredSubjectCourses} 
                   user={user}
                   enrollments={enrollments}
                   onEnroll={handleEnroll}
                 />
+              ) : subjectCourses.length > 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No {subject.toLowerCase()} courses match your search criteria.</p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedSubject('all');
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <SubjectIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -360,44 +354,6 @@ export default function CoursesPage() {
             </div>
           );
         })}
-
-        {/* Filtered Results (when search/filter is active) */}
-        {(searchQuery || selectedSubject !== 'all' || selectedTab !== 'all') && (
-          <div className="space-y-4 pt-8">
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-              <Search className="h-5 w-5" /> 
-              Search Results 
-              <span className="text-sm font-normal text-muted-foreground">
-                ({filteredCourses.length} courses found)
-              </span>
-            </h2>
-            {filteredCourses.length > 0 ? (
-              <CoursesGrid 
-                courses={filteredCourses} 
-                user={user}
-                enrollments={enrollments}
-                onEnroll={handleEnroll}
-                showProgress={selectedTab === 'enrolled'}
-              />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No courses found matching your criteria.</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedSubject('all');
-                    setSelectedTab('all');
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </AppShell>
   );
@@ -420,6 +376,15 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
     const enrollment = enrollments.find(e => e.course_id === courseId);
     return enrollment?.progress_percentage || 0;
   };
+
+  if (courses.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+        <p>No courses found matching your criteria.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
