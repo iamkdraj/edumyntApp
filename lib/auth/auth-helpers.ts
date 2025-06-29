@@ -45,6 +45,9 @@ export async function signIn(email: string, password: string) {
       throw formatAuthError({ message: 'No user returned from authentication', code: 'NO_USER' })
     }
 
+    // Wait a moment for the session to be properly set
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     return data;
   } catch (err: any) {
     console.error('Auth helper error:', err);

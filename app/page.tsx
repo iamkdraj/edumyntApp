@@ -23,14 +23,20 @@ export default function RootPage() {
       } catch (error) {
         console.error('Root page: Error checking auth:', error);
         window.location.replace('/auth/login');
+      } finally {
+        setIsChecking(false);
       }
     };
 
     // Small delay to ensure proper initialization
-    const timer = setTimeout(checkAuth, 200);
+    const timer = setTimeout(checkAuth, 300);
     
     return () => clearTimeout(timer);
   }, []);
+
+  if (!isChecking) {
+    return null; // Don't show loading if we're done checking
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">

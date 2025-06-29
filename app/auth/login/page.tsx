@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,12 +28,14 @@ export default function LoginPage() {
     try {
       console.log('Starting login process...');
       const result = await signIn(email, password);
-      console.log('Login successful, redirecting...');
+      console.log('Login successful:', result);
       
       toast.success('Welcome back!');
       
-      // Use window.location for reliable redirect
-      window.location.href = '/dashboard';
+      // Force a hard redirect to ensure proper navigation
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 100);
       
     } catch (err: any) {
       console.error('Login error:', err);
@@ -44,8 +48,14 @@ export default function LoginPage() {
 
   // Test login function for demo purposes
   const handleTestLogin = async () => {
+    setIsLoading(true);
     toast.success('Demo login successful!');
-    window.location.href = '/dashboard';
+    
+    // Simulate a brief loading state
+    setTimeout(() => {
+      setIsLoading(false);
+      window.location.href = '/dashboard';
+    }, 500);
   };
 
   return (
@@ -161,7 +171,14 @@ export default function LoginPage() {
                 onClick={handleTestLogin}
                 disabled={isLoading}
               >
-                Demo Login (Skip Authentication)
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Demo Login (Skip Authentication)'
+                )}
               </Button>
               
               <div className="text-center text-sm text-muted-foreground">

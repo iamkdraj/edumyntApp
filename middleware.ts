@@ -29,38 +29,33 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Only check auth for specific routes to avoid the searchParams bug
   const pathname = request.nextUrl.pathname
 
-  // Skip middleware for static files and API routes
+  // Skip middleware for static files, API routes, and auth callback
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
     pathname.includes('.') ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    pathname.includes('/auth/callback')
   ) {
     return response
   }
 
   try {
-    // Refresh session if expired - required for Server Components
+    // Get user session
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
-    // Define protected routes
+    // Define route categories
     const protectedRoutes = ['/dashboard', '/courses', '/tests', '/profile']
     const authRoutes = ['/auth/login', '/auth/signup', '/auth/forgot-password']
     
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
     const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
-    // Allow auth callback to proceed without redirect
-    if (pathname.includes('/auth/callback')) {
-      return response
-    }
-
-    // Redirect authenticated users away from auth pages to dashboard
+    // Redirect authenticated users away from auth pages
     if (user && isAuthRoute) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
@@ -70,19 +65,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
 
-    // Handle root path redirect
-    if (pathname === '/') {
-      if (user) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
-      } else {
-        return NextResponse.redirect(new URL('/auth/login', request.url))
-      }
-    }
+    // Handle root path - let the page component handle the redirect
+    // This avoids middleware conflicts with client-side auth checks
 
   } catch (error) {
     console.error('Middleware error:', error)
-    // On error, redirect to login for safety
-    if (pathname !== '/auth/login') {
+    // On error, only redirect if trying to access protected routes
+    const protectedRoutes = ['/dashboard', '/courses', '/tests', '/profile']
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+    
+    if (isProtectedRoute) {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
   }
