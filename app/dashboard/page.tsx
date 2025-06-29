@@ -24,6 +24,13 @@ import { db } from '@/lib/supabase/database';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from '@/components/ui/carousel';
 
 interface Course {
   id: string;
@@ -100,6 +107,11 @@ export default function DashboardPage() {
     enrollment.progress_percentage > 0 && enrollment.progress_percentage < 100
   );
 
+  // Recently visited: sort enrolledCourses by enrolled_at descending
+  const recentlyVisitedCourses = [...enrolledCourses]
+    .sort((a, b) => new Date(b.enrolled_at).getTime() - new Date(a.enrolled_at).getTime())
+    .slice(0, 8); // Show up to 8
+
   const recommendedCourses = allCourses.filter(course => 
     !enrolledCourses.some(enrollment => enrollment.course_id === course.id)
   ).slice(0, 6);
@@ -127,11 +139,11 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {/* Continue Learning Carousel */}
-        {continueCourses.length > 0 && (
+        {/* Recently Visited Courses Carousel */}
+        {recentlyVisitedCourses.length > 0 && (
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Continue Learning</h2>
+              <h2 className="text-xl font-semibold">Recently Visited Courses</h2>
               <Link href="/courses">
                 <Button variant="ghost" size="sm">
                   View All
@@ -139,7 +151,95 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            <CourseCarousel courses={continueCourses} type="continue" />
+            <Carousel opts={{ align: 'start', slidesToScroll: 1 }} className="-mx-2">
+              <CarouselContent className="pl-2">
+                {recentlyVisitedCourses.map((enrollment) => (
+                  <CarouselItem key={enrollment.course_id} className="basis-[85%] md:basis-[45%] lg:basis-[30%] pr-4">
+                    <CourseCard course={enrollment.courses} progress={enrollment.progress_percentage} type="continue" />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </section>
+        )}
+
+        {/* Continue Courses Carousel */}
+        {continueCourses.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Continue Courses</h2>
+              <Link href="/courses">
+                <Button variant="ghost" size="sm">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <Carousel opts={{ align: 'start', slidesToScroll: 1 }} className="-mx-2">
+              <CarouselContent className="pl-2">
+                {continueCourses.map((enrollment) => (
+                  <CarouselItem key={enrollment.course_id} className="basis-[85%] md:basis-[45%] lg:basis-[30%] pr-4">
+                    <CourseCard course={enrollment.courses} progress={enrollment.progress_percentage} type="continue" />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </section>
+        )}
+
+        {/* All Courses Carousel */}
+        {allCourses.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">All Courses</h2>
+              <Link href="/courses">
+                <Button variant="ghost" size="sm">
+                  Browse All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <Carousel opts={{ align: 'start', slidesToScroll: 1 }} className="-mx-2">
+              <CarouselContent className="pl-2">
+                {allCourses.map((course) => (
+                  <CarouselItem key={course.id} className="basis-[85%] md:basis-[45%] lg:basis-[30%] pr-4">
+                    <CourseCard course={course} type="all" />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </section>
+        )}
+
+        {/* All Tests Carousel */}
+        {tests.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">All Tests</h2>
+              <Link href="/tests">
+                <Button variant="ghost" size="sm">
+                  View All Tests
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <Carousel opts={{ align: 'start', slidesToScroll: 1 }} className="-mx-2">
+              <CarouselContent className="pl-2">
+                {tests.map((test) => (
+                  <CarouselItem key={test.id} className="basis-[85%] md:basis-[45%] lg:basis-[30%] pr-4">
+                    <TestCard test={test} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </section>
         )}
 
@@ -218,23 +318,17 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            <CourseCarousel courses={recommendedCourses} type="recommended" />
-          </section>
-        )}
-
-        {/* Tests Carousel */}
-        {tests.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Practice Tests</h2>
-              <Link href="/tests">
-                <Button variant="ghost" size="sm">
-                  View All Tests
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-            <TestCarousel tests={tests.slice(0, 6)} />
+            <Carousel opts={{ align: 'start', slidesToScroll: 1 }} className="-mx-2">
+              <CarouselContent className="pl-2">
+                {recommendedCourses.map((course) => (
+                  <CarouselItem key={course.id} className="basis-[85%] md:basis-[45%] lg:basis-[30%] pr-4">
+                    <CourseCard course={course} type="recommended" />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
           </section>
         )}
 
@@ -288,150 +382,126 @@ export default function DashboardPage() {
   );
 }
 
-// Course Carousel Component
-function CourseCarousel({ courses, type }: { courses: any[], type: 'continue' | 'recommended' }) {
+// CourseCard component for both carousels
+function CourseCard({ course, progress, type }: { course: any, progress?: number, type: 'continue' | 'all' | 'recommended' }) {
   return (
-    <div className="relative">
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-        {courses.map((item) => {
-          const course = type === 'continue' ? item.courses : item;
-          const progress = type === 'continue' ? item.progress_percentage : 0;
-          
-          return (
-            <Card key={course.id} className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200">
-              <CardHeader className="space-y-4">
-                {/* Course Image Placeholder */}
-                <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
-                  <BookOpen className="h-8 w-8 text-primary" />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-xs">
-                      {course.subject}
-                    </Badge>
-                    {course.is_free ? (
-                      <Badge variant="outline" className="text-green-600 border-green-200">
-                        Free
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">
-                        ${course.price}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <CardTitle className="text-lg leading-tight line-clamp-2">
-                    {course.title}
-                  </CardTitle>
-                  
-                  <CardDescription className="text-sm line-clamp-2">
-                    {course.description}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {/* Course Stats */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{course.lessons?.[0]?.count || 0} lessons</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    <span>{course.user_enrollments?.[0]?.count || 0}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>4.8</span>
-                  </div>
-                </div>
-
-                {/* Progress Bar (for continue courses) */}
-                {type === 'continue' && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="font-medium">{progress}%</span>
-                    </div>
-                    <Progress value={progress} className="h-2" />
-                  </div>
-                )}
-
-                {/* Action Button */}
-                <Button className="w-full" size="sm">
-                  {type === 'continue' ? (
-                    <>
-                      <Play className="h-4 w-4 mr-2" />
-                      Continue Learning
-                    </>
-                  ) : (
-                    <>
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      View Course
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
+    <Card className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200">
+      <CardHeader className="space-y-4">
+        <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
+          <BookOpen className="h-8 w-8 text-primary" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Badge variant="secondary" className="text-xs">
+              {course.subject}
+            </Badge>
+            {course.is_free ? (
+              <Badge variant="outline" className="text-green-600 border-green-200">
+                Free
+              </Badge>
+            ) : (
+              <Badge variant="outline">
+                ${course.price}
+              </Badge>
+            )}
+          </div>
+          <CardTitle className="text-lg leading-tight line-clamp-2">
+            {course.title}
+          </CardTitle>
+          <CardDescription className="text-sm line-clamp-2">
+            {course.description}
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>{course.lessons?.[0]?.count || 0} lessons</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{course.user_enrollments?.[0]?.count || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span>4.8</span>
+          </div>
+        </div>
+        {type === 'continue' && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+        )}
+        <Button className="w-full" size="sm">
+          {type === 'continue' ? (
+            <>
+              <Play className="h-4 w-4 mr-2" />
+              Continue Learning
+            </>
+          ) : type === 'recommended' ? (
+            <>
+              <BookOpen className="h-4 w-4 mr-2" />
+              View Course
+            </>
+          ) : (
+            <>
+              <BookOpen className="h-4 w-4 mr-2" />
+              View Course
+            </>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
-// Test Carousel Component
-function TestCarousel({ tests }: { tests: Test[] }) {
+// TestCard component for tests carousel
+function TestCard({ test }: { test: any }) {
   return (
-    <div className="relative">
-      <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-        {tests.map((test) => (
-          <Card key={test.id} className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="capitalize">
-                  {test.test_type.replace('_', ' ')}
-                </Badge>
-                {test.time_limit && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{test.time_limit}m</span>
-                  </div>
-                )}
-              </div>
-              
-              <CardTitle className="text-lg leading-tight line-clamp-2">
-                {test.title}
-              </CardTitle>
-              
-              <CardDescription className="text-sm line-clamp-2">
-                {test.description}
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <FileText className="h-4 w-4" />
-                  <span>{test.total_questions} questions</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Trophy className="h-4 w-4" />
-                  <span>Practice</span>
-                </div>
-              </div>
-
-              <Button className="w-full" size="sm">
-                <Play className="h-4 w-4 mr-2" />
-                Start Test
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <Card className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="capitalize">
+            {test.test_type.replace('_', ' ')}
+          </Badge>
+          {test.time_limit && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>{test.time_limit}m</span>
+            </div>
+          )}
+        </div>
+        <CardTitle className="text-lg leading-tight line-clamp-2 mt-2">
+          {test.title}
+        </CardTitle>
+        <CardDescription className="text-sm line-clamp-2">
+          {test.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <FileText className="h-4 w-4" />
+            <span>{test.total_questions} questions</span>
+          </div>
+          {test.courses && (
+            <div className="flex items-center gap-1">
+              <BookOpen className="h-4 w-4" />
+              <span>{test.courses.title}</span>
+            </div>
+          )}
+        </div>
+        <Button className="w-full" size="sm">
+          <Play className="h-4 w-4 mr-2" />
+          Start Test
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 

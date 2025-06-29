@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AppShell } from '@/components/layout/app-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,11 +21,13 @@ import {
   CheckCircle,
   ArrowRight,
   GraduationCap,
-  Target
+  Target,
+  Brain
 } from 'lucide-react';
 import { db } from '@/lib/supabase/database';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Course {
   id: string;
@@ -54,6 +56,11 @@ export default function CoursesPage() {
   const [selectedTab, setSelectedTab] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const enrolledRef = useRef<HTMLDivElement>(null);
+  const englishRef = useRef<HTMLDivElement>(null);
+  const psychologyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
@@ -126,6 +133,42 @@ export default function CoursesPage() {
     return matchesSearch && matchesSubject;
   });
 
+  // Group courses by subject
+  const enrolledCourses = courses.filter(c => enrollments.some(e => e.course_id === c.id));
+  const englishCourses = courses.filter(c => c.subject.toLowerCase() === 'english');
+  const psychologyCourses = courses.filter(c => c.subject.toLowerCase() === 'psychology');
+
+  // Tab data
+  const tabs = [
+    {
+      key: 'enrolled',
+      label: 'Enrolled',
+      icon: <GraduationCap className="h-4 w-4 mr-1" />,
+      count: enrolledCourses.length,
+      ref: enrolledRef,
+    },
+    {
+      key: 'english',
+      label: 'English',
+      icon: <BookOpen className="h-4 w-4 mr-1" />,
+      count: englishCourses.length,
+      ref: englishRef,
+    },
+    {
+      key: 'psychology',
+      label: 'Psychology',
+      icon: <Brain className="h-4 w-4 mr-1" />,
+      count: psychologyCourses.length,
+      ref: psychologyRef,
+    },
+  ];
+
+  const handleTabClick = (ref: React.RefObject<HTMLDivElement>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   if (isLoading) {
     return (
       <AppShell>
@@ -142,99 +185,62 @@ export default function CoursesPage() {
   return (
     <AppShell>
       <div className="flex-1 space-y-6 p-4 md:p-6">
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Explore Courses</h1>
-            <p className="text-muted-foreground text-lg">
-              Discover comprehensive courses designed for government exam preparation
-            </p>
-          </div>
-
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Subject" />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects.map(subject => (
-                  <SelectItem key={subject} value={subject}>
-                    {subject === 'all' ? 'All Subjects' : subject}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Sticky Tab Navigation */}
+        <div className="sticky top-0 z-30 bg-background py-2 border-b flex gap-2 items-center">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => handleTabClick(tab.ref)}
+              className="flex items-center px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium"
+            >
+              {tab.icon}
+              {tab.label}
+              <span className="ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
 
-        {/* Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Courses</TabsTrigger>
-            <TabsTrigger value="enrolled">My Courses</TabsTrigger>
-            <TabsTrigger value="free">Free Courses</TabsTrigger>
-          </TabsList>
+        {/* Enrolled Section */}
+        <div ref={enrolledRef} className="space-y-4 pt-4">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <GraduationCap className="h-5 w-5" /> Enrolled Courses
+          </h2>
+          <CoursesGrid 
+            courses={enrolledCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+            showProgress={true}
+          />
+        </div>
 
-          <TabsContent value="all" className="space-y-6">
-            <CoursesGrid 
-              courses={filteredCourses} 
-              user={user}
-              enrollments={enrollments}
-              onEnroll={handleEnroll}
-            />
-          </TabsContent>
+        {/* English Section */}
+        <div ref={englishRef} className="space-y-4 pt-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <BookOpen className="h-5 w-5" /> English Courses
+          </h2>
+          <CoursesGrid 
+            courses={englishCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+          />
+        </div>
 
-          <TabsContent value="enrolled" className="space-y-6">
-            {user ? (
-              <CoursesGrid 
-                courses={filteredCourses} 
-                user={user}
-                enrollments={enrollments}
-                onEnroll={handleEnroll}
-                showProgress={true}
-              />
-            ) : (
-              <div className="text-center py-12">
-                <GraduationCap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Sign in to view your courses</h3>
-                <p className="text-muted-foreground mb-4">
-                  Track your progress and continue learning where you left off
-                </p>
-                <Button>Sign In</Button>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="free" className="space-y-6">
-            <CoursesGrid 
-              courses={filteredCourses} 
-              user={user}
-              enrollments={enrollments}
-              onEnroll={handleEnroll}
-            />
-          </TabsContent>
-        </Tabs>
-
-        {filteredCourses.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No courses found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        )}
+        {/* Psychology Section */}
+        <div ref={psychologyRef} className="space-y-4 pt-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Brain className="h-5 w-5" /> Psychology Courses
+          </h2>
+          <CoursesGrid 
+            courses={psychologyCourses} 
+            user={user}
+            enrollments={enrollments}
+            onEnroll={handleEnroll}
+          />
+        </div>
       </div>
     </AppShell>
   );
