@@ -29,44 +29,60 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - required for Server Components
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Only check auth for specific routes to avoid the searchParams bug
+  const pathname = request.nextUrl.pathname
 
-  // Define protected routes
-  const protectedRoutes = ['/dashboard', '/courses', '/tests', '/profile']
-  const authRoutes = ['/auth/login', '/auth/signup', '/auth/forgot-password']
-  
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
-  const isAuthRoute = authRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
-
-  // Allow auth callback to proceed without redirect
-  if (request.nextUrl.pathname.includes('/auth/callback')) {
+  // Skip middleware for static files and API routes
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.includes('.') ||
+    pathname === '/favicon.ico'
+  ) {
     return response
   }
 
-  // Redirect authenticated users away from auth pages to dashboard
-  if (user && isAuthRoute) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+  try {
+    // Refresh session if expired - required for Server Components
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-  // Redirect unauthenticated users from protected routes to login
-  if (!user && isProtectedRoute) {
-    const redirectUrl = new URL('/auth/login', request.url)
-    redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
-  }
+    // Define protected routes
+    const protectedRoutes = ['/dashboard', '/courses', '/tests', '/profile']
+    const authRoutes = ['/auth/login', '/auth/signup', '/auth/forgot-password']
+    
+    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
-  // Redirect root path based on auth status
-  if (request.nextUrl.pathname === '/') {
-    if (user) {
+    // Allow auth callback to proceed without redirect
+    if (pathname.includes('/auth/callback')) {
+      return response
+    }
+
+    // Redirect authenticated users away from auth pages to dashboard
+    if (user && isAuthRoute) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
-    } else {
+    }
+
+    // Redirect unauthenticated users from protected routes to login
+    if (!user && isProtectedRoute) {
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+
+    // Handle root path redirect
+    if (pathname === '/') {
+      if (user) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      } else {
+        return NextResponse.redirect(new URL('/auth/login', request.url))
+      }
+    }
+
+  } catch (error) {
+    console.error('Middleware error:', error)
+    // On error, redirect to login for safety
+    if (pathname !== '/auth/login') {
       return NextResponse.redirect(new URL('/auth/login', request.url))
     }
   }
@@ -81,7 +97,6 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

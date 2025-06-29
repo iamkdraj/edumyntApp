@@ -30,10 +30,8 @@ export default function LoginPage() {
       
       toast.success('Welcome back!');
       
-      // Small delay to ensure the session is properly set
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 100);
+      // Use window.location for reliable redirect
+      window.location.href = '/dashboard';
       
     } catch (err: any) {
       console.error('Login error:', err);
@@ -46,15 +44,8 @@ export default function LoginPage() {
 
   // Test login function for demo purposes
   const handleTestLogin = async () => {
-    setEmail('test@example.com');
-    setPassword('testpassword');
-    
-    // Simulate a successful login for demo
-    setIsLoading(true);
-    setTimeout(() => {
-      toast.success('Demo login successful!');
-      window.location.href = '/dashboard';
-    }, 1000);
+    toast.success('Demo login successful!');
+    window.location.href = '/dashboard';
   };
 
   return (

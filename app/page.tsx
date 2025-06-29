@@ -15,28 +15,22 @@ export default function RootPage() {
         
         if (user) {
           console.log('Root page: User found, redirecting to dashboard');
-          window.location.href = '/dashboard';
+          window.location.replace('/dashboard');
         } else {
           console.log('Root page: No user found, redirecting to login');
-          window.location.href = '/auth/login';
+          window.location.replace('/auth/login');
         }
       } catch (error) {
         console.error('Root page: Error checking auth:', error);
-        window.location.href = '/auth/login';
-      } finally {
-        setIsChecking(false);
+        window.location.replace('/auth/login');
       }
     };
 
-    // Add a small delay to ensure the page is fully loaded
-    const timer = setTimeout(checkAuth, 100);
+    // Small delay to ensure proper initialization
+    const timer = setTimeout(checkAuth, 200);
     
     return () => clearTimeout(timer);
   }, []);
-
-  if (!isChecking) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
