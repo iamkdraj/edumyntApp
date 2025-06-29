@@ -385,26 +385,42 @@ export default function DashboardPage() {
 // CourseCard component for both carousels
 function CourseCard({ course, progress, type }: { course: any, progress?: number, type: 'continue' | 'all' | 'recommended' }) {
   return (
-    <Card className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200">
-      <CardHeader className="space-y-4">
-        <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg flex items-center justify-center">
-          <BookOpen className="h-8 w-8 text-primary" />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="text-xs">
+    <Card className="flex-shrink-0 w-80 hover:shadow-lg transition-all duration-200 overflow-hidden">
+      <CardHeader className="space-y-4 p-0">
+        {/* Course Image */}
+        <div className="aspect-video relative overflow-hidden">
+          {course.thumbnail_url ? (
+            <img 
+              src={course.thumbnail_url} 
+              alt={course.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+              <BookOpen className="h-8 w-8 text-primary" />
+            </div>
+          )}
+          {/* Overlay with subject badge */}
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="text-xs bg-background/90 backdrop-blur-sm">
               {course.subject}
             </Badge>
+          </div>
+          {/* Price badge */}
+          <div className="absolute top-3 right-3">
             {course.is_free ? (
-              <Badge variant="outline" className="text-green-600 border-green-200">
+              <Badge variant="outline" className="text-green-600 border-green-200 bg-background/90 backdrop-blur-sm">
                 Free
               </Badge>
             ) : (
-              <Badge variant="outline">
+              <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
                 ${course.price}
               </Badge>
             )}
           </div>
+        </div>
+
+        <div className="space-y-2 p-4 pb-0">
           <CardTitle className="text-lg leading-tight line-clamp-2">
             {course.title}
           </CardTitle>
@@ -413,7 +429,7 @@ function CourseCard({ course, progress, type }: { course: any, progress?: number
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-4">
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
