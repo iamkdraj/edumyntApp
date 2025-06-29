@@ -4,10 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { BookOpen, ArrowLeft, Mail, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, ShoppingCart, CheckCircle } from 'lucide-react';
 import { resetPassword } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
 
@@ -35,118 +33,137 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-0 shadow-xl">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-2xl font-semibold">Check your email</h2>
-                <p className="text-muted-foreground">
-                  We've sent a password reset link to <strong>{email}</strong>
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Please check your inbox and follow the instructions to reset your password.
-                </p>
-              </div>
-              <div className="space-y-3 pt-4">
-                <Link href="/auth/login">
-                  <Button className="w-full">
-                    Back to Login
-                  </Button>
-                </Link>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSuccess(false)}
-                  className="w-full"
-                >
-                  Try Different Email
-                </Button>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 md:p-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => setSuccess(false)}
+            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors p-0"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            <span className="text-sm font-medium">Back</span>
+          </Button>
+        </div>
+
+        {/* Success Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+          <div className="w-full max-w-sm text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <Mail className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-gray-900">Check your email</h2>
+              <p className="text-gray-600">
+                We've sent a password reset link to <span className="font-semibold">{email}</span>
+              </p>
+              <p className="text-sm text-gray-500">
+                Please check your inbox and follow the instructions to reset your password.
+              </p>
+            </div>
+            <div className="space-y-3 pt-4">
+              <Link href="/auth/login">
+                <Button className="w-full h-14 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold rounded-2xl text-base shadow-lg transition-all duration-200 transform hover:scale-[1.02]">
+                  Back to Login
+                </Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                onClick={() => setSuccess(false)}
+                className="w-full h-14 border-2 border-gray-200 text-gray-700 font-semibold rounded-2xl text-base hover:bg-gray-50 transition-all"
+              >
+                Try Different Email
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo and Brand */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-primary">EDUMYNT</span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Reset your password</h1>
-          <p className="text-muted-foreground">Enter your email to receive a reset link</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 md:p-6">
+        <Link href="/auth/login" className="flex items-center text-gray-600 hover:text-gray-900 transition-colors">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          <span className="text-sm font-medium">Back</span>
+        </Link>
+        <h1 className="text-lg font-semibold text-gray-900">Reset Password</h1>
+        <div className="w-16"></div> {/* Spacer for center alignment */}
+      </div>
 
-        {/* Reset Form */}
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl">Forgot your password?</CardTitle>
-            <CardDescription>
-              No worries! Enter your email and we'll send you a reset link.
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Logo and Title */}
+          <div className="text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="h-8 w-8 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-yellow-600 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-gray-900">Reset your password</h1>
+              <p className="text-gray-600">Enter your email to receive a reset link</p>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <Alert variant="destructive" className="text-sm">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
-                  id="email"
                   type="email"
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="h-11"
+                  className="pl-12 h-14 bg-gray-100 border-0 rounded-2xl text-base placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-cyan-500 transition-all"
                 />
               </div>
-            </CardContent>
-            
-            <CardFooter className="flex flex-col space-y-4">
-              <Button 
-                type="submit" 
-                className="w-full h-11" 
-                disabled={isLoading || !email}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending reset link...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Send reset link
-                  </>
-                )}
-              </Button>
-              
-              <Link href="/auth/login" className="w-full">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to login
-                </Button>
+            </div>
+
+            {/* Send Reset Link Button */}
+            <Button 
+              type="submit" 
+              className="w-full h-14 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white font-semibold rounded-2xl text-base shadow-lg transition-all duration-200 transform hover:scale-[1.02]" 
+              disabled={isLoading || !email}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Sending reset link...
+                </>
+              ) : (
+                'Send reset link'
+              )}
+            </Button>
+
+            {/* Back to Login Link */}
+            <div className="text-center">
+              <Link href="/auth/login" className="text-cyan-600 hover:text-cyan-700 font-semibold text-sm transition-colors">
+                Back to login
               </Link>
-            </CardFooter>
+            </div>
           </form>
-        </Card>
+        </div>
       </div>
     </div>
   );
