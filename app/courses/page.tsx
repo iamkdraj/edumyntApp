@@ -5,16 +5,12 @@ import { AppShell } from '@/components/layout/app-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { 
   BookOpen, 
   Clock, 
   Users, 
   Star, 
-  Search, 
-  Filter,
   Play,
   Lock,
   CheckCircle,
@@ -30,7 +26,6 @@ import {
 import { db } from '@/lib/supabase/database';
 import { getCurrentUser } from '@/lib/auth/auth-helpers';
 import { toast } from 'sonner';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Course {
   id: string;
@@ -68,16 +63,11 @@ const getSubjectIcon = (subject: string) => {
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<UserEnrollment[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [filterOpen, setFilterOpen] = useState(false);
   
   // Refs for smooth scrolling
   const enrolledRef = useRef<HTMLDivElement>(null);
-  const allCoursesRef = useRef<HTMLDivElement>(null);
   const subjectRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
@@ -135,24 +125,14 @@ export default function CoursesPage() {
   };
 
   // Get unique subjects from courses
-  const subjects = ['all', ...Array.from(new Set(courses.map(c => c.subject)))];
+  const subjects = Array.from(new Set(courses.map(c => c.subject))).sort();
 
   // Group courses by subject
   const enrolledCourses = courses.filter(c => enrollments.some(e => e.course_id === c.id));
-  const coursesBySubject = subjects.slice(1).reduce((acc, subject) => {
+  const coursesBySubject = subjects.reduce((acc, subject) => {
     acc[subject] = courses.filter(c => c.subject === subject);
     return acc;
   }, {} as { [key: string]: Course[] });
-
-  // Filter courses based on search and subject
-  const getFilteredCourses = (coursesToFilter: Course[]) => {
-    return coursesToFilter.filter(course => {
-      const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           course.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
-      return matchesSearch && matchesSubject;
-    });
-  };
 
   // Tab data for navigation
   const tabs = [
@@ -163,14 +143,7 @@ export default function CoursesPage() {
       count: enrolledCourses.length,
       ref: enrolledRef,
     },
-    {
-      key: 'all',
-      label: 'All Courses',
-      icon: BookOpen,
-      count: courses.length,
-      ref: allCoursesRef,
-    },
-    ...subjects.slice(1).map(subject => ({
+    ...subjects.map(subject => ({
       key: subject.toLowerCase(),
       label: subject,
       icon: getSubjectIcon(subject),
@@ -201,75 +174,24 @@ export default function CoursesPage() {
   return (
     <AppShell>
       <div className="flex-1 space-y-6 p-4 md:p-6">
-        {/* Header with Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Courses</h1>
-            <p className="text-muted-foreground">Explore our comprehensive course catalog</p>
-          </div>
-          
-          <div className="flex gap-2">
-            <Popover open={searchOpen} onOpenChange={setSearchOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Search Courses</h4>
-                  <Input
-                    placeholder="Search by title or description..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={filterOpen} onOpenChange={setFilterOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Subject</h4>
-                    <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select subject" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subjects.map(subject => (
-                          <SelectItem key={subject} value={subject}>
-                            {subject === 'all' ? 'All Subjects' : subject}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Courses</h1>
+          <p className="text-muted-foreground">Explore our comprehensive course catalog</p>
         </div>
 
         {/* Sticky Tab Navigation */}
-        <div className="sticky top-0 z-30 bg-background py-2 border-b">
-          <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide">
+        <div className="sticky top-0 z-30 bg-background py-4 border-b">
+          <div className="flex gap-2 items-center overflow-x-auto scrollbar-hide pb-2">
             {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.key}
                   onClick={() => handleTabClick(tab.ref)}
-                  className="flex items-center px-3 py-1 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium whitespace-nowrap"
+                  className="flex items-center px-4 py-2 rounded-full bg-muted hover:bg-primary/10 transition text-sm font-medium whitespace-nowrap min-w-fit"
                 >
-                  <IconComponent className="h-4 w-4 mr-1" />
+                  <IconComponent className="h-4 w-4 mr-2" />
                   {tab.label}
                   <span className="ml-2 text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
                     {tab.count}
@@ -281,80 +203,59 @@ export default function CoursesPage() {
         </div>
 
         {/* Enrolled Section */}
-        <div ref={enrolledRef} className="space-y-4 pt-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <GraduationCap className="h-5 w-5" /> Enrolled Courses
-          </h2>
+        <div ref={enrolledRef} className="space-y-6 pt-4">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-semibold">Enrolled Courses</h2>
+          </div>
           {enrolledCourses.length > 0 ? (
             <CoursesGrid 
-              courses={getFilteredCourses(enrolledCourses)} 
+              courses={enrolledCourses} 
               user={user}
               enrollments={enrollments}
               onEnroll={handleEnroll}
               showProgress={true}
             />
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No enrolled courses yet. Start learning by enrolling in a course!</p>
+            <div className="text-center py-12 text-muted-foreground">
+              <GraduationCap className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">No enrolled courses yet</h3>
+              <p>Start learning by enrolling in a course below!</p>
             </div>
           )}
         </div>
 
-        {/* All Courses Section */}
-        <div ref={allCoursesRef} className="space-y-4 pt-8">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <BookOpen className="h-5 w-5" /> All Courses
-          </h2>
-          <CoursesGrid 
-            courses={getFilteredCourses(courses)} 
-            user={user}
-            enrollments={enrollments}
-            onEnroll={handleEnroll}
-          />
-        </div>
-
         {/* Subject-wise Sections */}
-        {subjects.slice(1).map(subject => {
+        {subjects.map(subject => {
           const subjectCourses = coursesBySubject[subject] || [];
-          const filteredSubjectCourses = getFilteredCourses(subjectCourses);
           const SubjectIcon = getSubjectIcon(subject);
           
           return (
             <div 
               key={subject}
               ref={el => subjectRefs.current[subject] = el}
-              className="space-y-4 pt-8"
+              className="space-y-6 pt-8"
             >
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <SubjectIcon className="h-5 w-5" /> {subject} Courses
-              </h2>
-              {filteredSubjectCourses.length > 0 ? (
+              <div className="flex items-center gap-3">
+                <SubjectIcon className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-semibold">{subject} Courses</h2>
+                <Badge variant="outline" className="ml-auto">
+                  {subjectCourses.length} course{subjectCourses.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+              
+              {subjectCourses.length > 0 ? (
                 <CoursesGrid 
-                  courses={filteredSubjectCourses} 
+                  courses={subjectCourses} 
                   user={user}
                   enrollments={enrollments}
                   onEnroll={handleEnroll}
                 />
-              ) : subjectCourses.length > 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No {subject.toLowerCase()} courses match your search criteria.</p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedSubject('all');
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <SubjectIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No {subject.toLowerCase()} courses available yet.</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <SubjectIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-medium mb-2">No {subject.toLowerCase()} courses available</h3>
+                  <p>New courses will be added soon!</p>
                 </div>
               )}
             </div>
@@ -387,7 +288,7 @@ function CoursesGrid({ courses, user, enrollments, onEnroll, showProgress = fals
     return (
       <div className="text-center py-8 text-muted-foreground">
         <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p>No courses found matching your criteria.</p>
+        <p>No courses found.</p>
       </div>
     );
   }
