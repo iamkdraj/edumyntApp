@@ -162,25 +162,15 @@ export class DatabaseService {
   }
 
   async getLesson(lessonId: string) {
-    console.log('Fetching lesson with ID:', lessonId);
     const { data, error } = await this.supabase
       .from('lessons')
-      .select(`
-        *,
-        content,
-        courses(*),
-        notes(*),
-        course_modules(*)
-      `)
+      .select(`*`)
       .eq('id', lessonId)
       .single()
-  
+
     if (error) {
-      console.error('Error fetching lesson:', error);
       throw error;
     }
-  
-    console.log('Fetched lesson data:', data);
     return data;
   }
 
