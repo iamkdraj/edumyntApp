@@ -162,25 +162,15 @@ export class DatabaseService {
   }
 
   async getLesson(lessonId: string) {
-    console.log('Fetching lesson with ID:', lessonId);
     const { data, error } = await this.supabase
       .from('lessons')
-      .select(`
-        *,
-        content,
-        courses(*),
-        notes(*),
-        course_modules(*)
-      `)
+      .select(`*`)
       .eq('id', lessonId)
       .single()
-  
+
     if (error) {
-      console.error('Error fetching lesson:', error);
       throw error;
     }
-  
-    console.log('Fetched lesson data:', data);
     return data;
   }
 
@@ -467,6 +457,18 @@ export class DatabaseService {
     
     if (error) throw error
     return data
+  }
+
+  // Notes/files for a lesson
+  async getNotes(courseId: string, lessonId: string) {
+    const { data, error } = await this.supabase
+      .from('notes')
+      .select('*')
+      .eq('course_id', courseId)
+      .eq('lesson_id', lessonId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
   }
 }
 
