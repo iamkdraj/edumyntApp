@@ -1,5 +1,5 @@
 "use client";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
@@ -14,11 +14,6 @@ export default function MobileLessonSheet({ lessons, courseId, lessonId, open, s
   return (
     <div className="md:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="fixed top-4 left-4 z-40 bg-background/80 backdrop-blur border md:hidden">
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
         <SheetContent side="left" className="w-80 max-w-full p-0">
           <SheetHeader>
             <SheetTitle className="p-4">Lessons</SheetTitle>

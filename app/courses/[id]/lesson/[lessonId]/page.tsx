@@ -43,6 +43,7 @@ export default function CourseLessonPage({ params }: { params: { id: string; les
         open={menuOpen}
         setOpen={setMenuOpen}
       />
+      {/* Only show the lesson top bar, not the main top bar */}
       <LessonTopBar courseId={courseId} onMenuClick={() => setMenuOpen(true)} />
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Desktop Collapsible Sidebar: All Lessons */}
