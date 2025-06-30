@@ -1,29 +1,49 @@
+"use client";
+import { useState } from 'react';
 import { db } from '@/lib/supabase/database';
-import { TopBar } from '@/components/layout/top-bar';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import React from 'react';
 import CollapsibleSidebar from '@/components/layout/collapsible-sidebar';
+import MobileLessonSheet from '@/components/layout/mobile-lesson-sheet';
+import LessonTopBar from '@/components/layout/lesson-top-bar';
+import LessonBottomBar from '@/components/layout/lesson-bottom-bar';
+import React, { useEffect } from 'react';
 
-export default async function CourseLessonPage({ params }: { params: { id: string; lessonId: string } }) {
+export default function CourseLessonPage({ params }: { params: { id: string; lessonId: string } }) {
   const { id: courseId, lessonId } = params;
+  const [lesson, setLesson] = useState<any>(null);
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Fetch lesson and all lessons in course
-  let lesson = null;
-  let lessons = [];
-  try {
-    lesson = await db.getLesson(lessonId);
-    lessons = await db.getLessons(courseId);
-  } catch (e) {
-    // fallback: show not found
-  }
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const lessonData = await db.getLesson(lessonId);
+        const lessonsData = await db.getLessons(courseId);
+        setLesson(lessonData);
+        setLessons(lessonsData);
+      } catch (e) {
+        setLesson(null);
+        setLessons([]);
+      }
+    }
+    fetchData();
+  }, [courseId, lessonId]);
 
-  // Find current lesson index for prev/next
   const currentIndex = lessons.findIndex((l: any) => l.id === lessonId);
+  const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+  const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <TopBar />
+      {/* Mobile menu button and sidebar for lessons */}
+      <MobileLessonSheet
+        lessons={lessons}
+        courseId={courseId}
+        lessonId={lessonId}
+        open={menuOpen}
+        setOpen={setMenuOpen}
+      />
+      <LessonTopBar courseId={courseId} onMenuClick={() => setMenuOpen(true)} />
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Desktop Collapsible Sidebar: All Lessons */}
         <CollapsibleSidebar lessons={lessons} courseId={courseId} lessonId={lessonId} />
@@ -39,6 +59,7 @@ export default async function CourseLessonPage({ params }: { params: { id: strin
           )}
         </main>
       </div>
+      <LessonBottomBar prevLesson={prevLesson} nextLesson={nextLesson} courseId={courseId} />
     </div>
   );
 }
