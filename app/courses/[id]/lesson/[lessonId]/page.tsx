@@ -16,10 +16,12 @@ const demoLesson = {
   }
 };
 
-export default async function CourseLessonPage({ params }: { params: { lessonId: string } }) {
+export default async function CourseLessonPage({ params }: { params: { id: string; lessonId: string } }) {
+  // Await the params object before destructuring in Next.js 15+
+  const { lessonId } = await params;
   let lesson;
   try {
-    lesson = await db.getLesson(params.lessonId);
+    lesson = await db.getLesson(lessonId);
   } catch (e) {
     lesson = null;
   }
