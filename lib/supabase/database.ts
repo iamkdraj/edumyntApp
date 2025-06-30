@@ -458,6 +458,18 @@ export class DatabaseService {
     if (error) throw error
     return data
   }
+
+  // Notes/files for a lesson
+  async getNotes(courseId: string, lessonId: string) {
+    const { data, error } = await this.supabase
+      .from('notes')
+      .select('*')
+      .eq('course_id', courseId)
+      .eq('lesson_id', lessonId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
 }
 
 export const db = new DatabaseService()
